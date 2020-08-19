@@ -25,12 +25,22 @@ func readEnvFile() string {
 }
 
 func getConfigParamValue(param string, data string) (paramVal string, err error) {
-	pattern := param + "=(\\w+)"
+	pattern := "(?m)^" + param + ".+"
 	re := regexp.MustCompile(pattern)
-	data = re.FindString(data)
-	value := strings.Split(data, "=")
+	match := re.FindString(data)
 
-	return value[1], err
+	if match == "" {
+		log.Fatal("Param not found in env")
+	}
+
+	value := strings.Split(match, "=")
+	val := value[1]
+
+	for i := 2; i < len(value); i++ {
+		val += "=" + value[i]
+	}
+
+	return strings.Trim(val, "\""), err
 }
 
 func getEnvFileContent() string {
